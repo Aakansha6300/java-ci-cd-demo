@@ -3,8 +3,9 @@ pipeline {
 
    tools {
     maven 'Maven'
-    sonarScanner 'sonar-scanner'
+    sonarQubeScanner 'sonar-scanner'
 }
+
  
     stages {
 
