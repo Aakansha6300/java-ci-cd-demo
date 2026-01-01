@@ -1,13 +1,21 @@
 pipeline {
     agent any
 
-   tools {
-    maven 'Maven'
-    sonarQubeScanner 'sonar-scanner'
-}
+    tools {
+        maven 'Maven'
+    }
 
- 
+    environment {
+        SONAR_PROJECT_KEY = 'java-app'
+    }
+
     stages {
+
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
 
         stage('Build') {
             steps {
@@ -18,12 +26,10 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv('sonarqube') {
-                    sh '''
-                    sonar-scanner \
-                      -Dsonar.projectKey=java-app \
-                      -Dsonar.sources=src \
-                      -Dsonar.java.binaries=target
-                    '''
+                    sh """
+                      mvn sonar:sonar \
+                      -Dsonar.projectKey=${SONAR_PROJECT_KEY}
+                    """
                 }
             }
         }
