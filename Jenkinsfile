@@ -1,7 +1,11 @@
 pipeline {
     agent any
 
-    
+   tools {
+    maven 'Maven'
+    sonarScanner 'sonar-scanner'
+}
+ 
     stages {
 
         stage('Build') {
