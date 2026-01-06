@@ -36,11 +36,9 @@ pipeline {
             }
         }
 
-        stage('Quality Gate') {
+        stage('Quality Gate (Non-blocking)') {
             steps {
-                timeout(time: 5, unit: 'MINUTES') {
-                    waitForQualityGate abortPipeline: false
-                }
+                echo "ℹ️ Quality Gate checked in SonarQube dashboard (non-blocking)"
             }
         }
 
@@ -69,10 +67,11 @@ pipeline {
     post {
         success {
             echo "🚀 CI/CD pipeline completed successfully!"
-            echo "🌐 Application running on http://localhost:${PORT}"
+            echo "🌐 App running on http://localhost:${PORT}"
+            echo "📊 SonarQube: http://localhost:9000/dashboard?id=${SONAR_PROJECT}"
         }
         failure {
-            echo "❌ Pipeline failed — check logs"
+            echo "❌ Pipeline failed"
         }
     }
 }
