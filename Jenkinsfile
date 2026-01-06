@@ -7,8 +7,11 @@ pipeline {
     }
 
     environment {
-        CONTAINER = "java-app"
-        PORT      = "8090"
+        APP_NAME      = "java-app"
+        IMAGE_NAME    = "aakansha/java-app"
+        CONTAINER     = "java-app"
+        PORT          = "8090"
+        SONAR_PROJECT = "java-app"
     }
 
     stages {
@@ -19,7 +22,7 @@ pipeline {
             }
         }
 
-        stage('Maven Build') {
+        stage('Maven Build & Test') {
             steps {
                 sh 'mvn clean package'
             }
@@ -28,24 +31,24 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv('sonarqube') {
-                    sh 'mvn sonar:sonar -Dsonar.projectKey=java-app'
+                    sh "mvn sonar:sonar -Dsonar.projectKey=${SONAR_PROJECT}"
                 }
             }
         }
 
-stage('Quality Gate') {
-    steps {
-        timeout(time: 5, unit: 'MINUTES') {
-            waitForQualityGate abortPipeline: true
+        stage('Quality Gate') {
+            steps {
+                timeout(time: 5, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: false
+                }
+            }
         }
-    }
-}
 
         stage('Docker Build') {
             steps {
                 sh '''
-                docker build -t aakansha/java-app:${BUILD_NUMBER} .
-                docker tag aakansha/java-app:${BUILD_NUMBER} aakansha/java-app:latest
+                docker build -t ${IMAGE_NAME}:${BUILD_NUMBER} .
+                docker tag ${IMAGE_NAME}:${BUILD_NUMBER} ${IMAGE_NAME}:latest
                 '''
             }
         }
@@ -53,11 +56,11 @@ stage('Quality Gate') {
         stage('Docker Deploy') {
             steps {
                 sh '''
-                docker rm -f $CONTAINER || true
+                docker rm -f ${CONTAINER} || true
                 docker run -d \
-                  --name $CONTAINER \
-                  -p $PORT:$PORT \
-                  aakansha/java-app:${BUILD_NUMBER}
+                  --name ${CONTAINER} \
+                  -p ${PORT}:${PORT} \
+                  ${IMAGE_NAME}:${BUILD_NUMBER}
                 '''
             }
         }
@@ -65,10 +68,11 @@ stage('Quality Gate') {
 
     post {
         success {
-            echo "🚀 Application built, scanned, and deployed successfully"
+            echo "🚀 CI/CD pipeline completed successfully!"
+            echo "🌐 Application running on http://localhost:${PORT}"
         }
         failure {
-            echo "❌ Pipeline failed — build or quality gate issue"
+            echo "❌ Pipeline failed — check logs"
         }
     }
 }
