@@ -27,15 +27,22 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
     </dependencies>
+<build>
+    <plugins>
 
-    <build>
-        <plugins>
-            <!-- Makes executable JAR -->
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
+        <!-- Spring Boot plugin -->
+        <plugin>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-maven-plugin</artifactId>
+        </plugin>
 
-</project>
+        <!-- SonarQube Maven plugin -->
+        <plugin>
+            <groupId>org.sonarsource.scanner.maven</groupId>
+            <artifactId>sonar-maven-plugin</artifactId>
+            <version>3.11.0.3922</version>
+        </plugin>
+
+    </plugins>
+</build>
+
